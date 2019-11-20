@@ -28,11 +28,11 @@ namespace MLNET.SpamDetection
 
 
             // Set the training algorithm 
-            var trainer = mlContext.MulticlassClassification.Trainers.OneVersusAll(mlContext.BinaryClassification.Trainers.AveragedPerceptron(labelColumnName: "Label", numberOfIterations: 20, featureColumnName: "FeaturesText"), labelColumnName: "Label")
-                                      .Append(mlContext.Transforms.Conversion.MapKeyToValue("PredictedLabel", "PredictedLabel"));
+            var trainer = mlContext.MulticlassClassification.Trainers.PairwiseCoupling(
+                    mlContext.BinaryClassification.Trainers.AveragedPerceptron("Label", numberOfIterations: 20, featureColumnName: "FeaturesText"))
+                .Append(mlContext.Transforms.Conversion.MapKeyToValue("PredictedLabel", "PredictedLabel"));
             var trainingPipeLine = dataProcessPipeline.Append(trainer);
-
-
+            
             Console.WriteLine("Training model...");
 
             // Now let's train a model on the full data set!
@@ -47,13 +47,13 @@ namespace MLNET.SpamDetection
             // Create a PredictionFunction from our model 
             var predictor = mlContext.Model.CreatePredictionEngine<SpamInput, SpamPrediction>(model);
 
-            Console.WriteLine("\nType message to be checked or type empty message to exit");
-            string readLine;
-            while (!string.IsNullOrEmpty(readLine = Console.ReadLine()))
+            Console.WriteLine("\nType message to be checked or type exit");
+            string message;
+            while (!(message = Console.ReadLine())?.Equals("exit", StringComparison.OrdinalIgnoreCase) ?? true)
             {
-                if (readLine.Equals("exit", StringComparison.InvariantCultureIgnoreCase))
-                    break;
-                ClassifyMessage(predictor, readLine);
+                if (string.IsNullOrWhiteSpace(message))
+                    continue;
+                ClassifyMessage(predictor, message);
             }
         }
 
