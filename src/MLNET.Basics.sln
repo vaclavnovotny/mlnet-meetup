@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29509.3
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MLNET.Basics", "MLNET.Basics\MLNET.Basics.csproj", "{050080E5-B530-42DA-9215-177D7D8AF268}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MLNET.SpamDetection", "MLNET.SpamDetection\MLNET.SpamDetection.csproj", "{0670FD32-3A38-468C-9316-6888A5BE579E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{050080E5-B530-42DA-9215-177D7D8AF268}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{050080E5-B530-42DA-9215-177D7D8AF268}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{050080E5-B530-42DA-9215-177D7D8AF268}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{050080E5-B530-42DA-9215-177D7D8AF268}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0670FD32-3A38-468C-9316-6888A5BE579E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0670FD32-3A38-468C-9316-6888A5BE579E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0670FD32-3A38-468C-9316-6888A5BE579E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0670FD32-3A38-468C-9316-6888A5BE579E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {DF74B2F4-FCDF-481A-BB8E-3C92904B0495}
+	EndGlobalSection
+EndGlobal
