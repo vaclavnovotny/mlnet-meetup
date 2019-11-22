@@ -7,14 +7,11 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.ML" Version="1.4.0" />
+    <PackageReference Include="Microsoft.ML.AutoML" Version="0.16.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="RawData\" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\MLNET.Basics\MLNET.Core.csproj" />
+    <ProjectReference Include="..\MLNET.SpamDetection\MLNET.SpamDetection.csproj" />
   </ItemGroup>
 
 </Project>

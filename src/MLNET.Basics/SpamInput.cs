@@ -1,6 +1,6 @@
 ﻿using Microsoft.ML.Data;
 
-namespace MLNET.SpamDetection {
+namespace MLNET.Core {
     public class SpamInput
     {
         [LoadColumn(0), ColumnName("Label")]

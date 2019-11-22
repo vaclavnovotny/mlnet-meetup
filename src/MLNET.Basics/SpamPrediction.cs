@@ -1,7 +1,7 @@
 ﻿using System;
 using Microsoft.ML.Data;
 
-namespace MLNET.SpamDetection {
+namespace MLNET.Core {
     public class SpamPrediction
     {
         [ColumnName("PredictedLabel")]

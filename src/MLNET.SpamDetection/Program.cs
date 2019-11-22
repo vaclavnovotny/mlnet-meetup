@@ -3,10 +3,11 @@ using System.IO;
 using Microsoft.ML;
 using Microsoft.ML.Data;
 using Microsoft.ML.Transforms;
-using MLNET.Basics;
+using MLNET.Core;
 
 namespace MLNET.SpamDetection
 {
+
     class Program
     {
         static void Main(string[] args)
@@ -26,7 +27,6 @@ namespace MLNET.SpamDetection
                 .Append(mlContext.Transforms.NormalizeLpNorm("Features", "Features"))
                 .AppendCacheCheckpoint(mlContext);
 
-
             // Set the training algorithm 
             var trainer = mlContext.MulticlassClassification.Trainers.PairwiseCoupling(
                     mlContext.BinaryClassification.Trainers.AveragedPerceptron("Label", numberOfIterations: 20, featureColumnName: "FeaturesText"))
@@ -41,45 +41,25 @@ namespace MLNET.SpamDetection
                 model = trainingPipeLine.Fit(data);
             }
 
-            // Calculate some metrics
-            OutputMetrics(model, data, mlContext);
+            mlContext.Model.Save(model, data.Schema, Path.Combine($"{Environment.CurrentDirectory}", "SpamDetectorModel.zip"));
 
+            // Calculate some metrics
+            Helpers.OutputMultiClassMetrics(model, data, mlContext);
+            
+            TestMessages(mlContext, model);
+        }
+
+        private static void TestMessages(MLContext mlContext, TransformerChain<TransformerChain<KeyToValueMappingTransformer>> model) {
             // Create a PredictionFunction from our model 
             var predictor = mlContext.Model.CreatePredictionEngine<SpamInput, SpamPrediction>(model);
 
             Console.WriteLine("\nType message to be checked or type exit");
             string message;
-            while (!(message = Console.ReadLine())?.Equals("exit", StringComparison.OrdinalIgnoreCase) ?? true)
-            {
+            while (!(message = Console.ReadLine())?.Equals("exit", StringComparison.OrdinalIgnoreCase) ?? true) {
                 if (string.IsNullOrWhiteSpace(message))
                     continue;
-                ClassifyMessage(predictor, message);
+                Helpers.ClassifyMessage(predictor, message);
             }
-        }
-
-        private static void OutputMetrics(TransformerChain<TransformerChain<KeyToValueMappingTransformer>> model, IDataView data, MLContext mlContext) {
-            
-            var dataView = model.Transform(data);
-            var metrics = mlContext.MulticlassClassification.Evaluate(dataView);
-            var confusionTable = metrics.ConfusionMatrix.GetFormattedConfusionTable();
-            Console.WriteLine($"\nMicro accuracy: {metrics.MicroAccuracy}");
-            Console.WriteLine($"Macro accuracy: {metrics.MacroAccuracy}");
-            Console.WriteLine($"Log Loss: {metrics.LogLoss}");
-            Console.WriteLine($"Log Loss reduction: {metrics.LogLossReduction}");
-            Console.Write(confusionTable);
-        }
-
-        private static void ClassifyMessage(PredictionEngine<SpamInput, SpamPrediction> predictor, string message)
-        {
-            var input = new SpamInput { Message = message };
-
-            SpamPrediction prediction;
-            using (new PerformanceTimer("Prediction", true)) {
-                prediction = predictor.Predict(input);
-            }
-            Console.BackgroundColor = prediction.IsSpam ? ConsoleColor.DarkRed : ConsoleColor.Black;
-            Console.WriteLine($"The message '{input.Message}' is {(prediction.IsSpam ? "spam" : "not spam")}. {prediction.Scores[0]:0.000}, {prediction.Scores[1]:0.000}\n");
-            Console.BackgroundColor = ConsoleColor.Black;
         }
     }
 }

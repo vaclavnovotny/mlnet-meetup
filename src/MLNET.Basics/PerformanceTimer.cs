@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 
-namespace MLNET.Basics
+namespace MLNET.Core
 {
     public class PerformanceTimer : IDisposable
     {
