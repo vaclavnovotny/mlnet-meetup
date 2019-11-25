@@ -19,24 +19,26 @@ namespace MLNET.RealWorld.Services
         public async Task Train() {
             var data = await _dataLoader.Load();
 
-            var dataProcessPipeline =
-                    _mlContext.Transforms.Text.FeaturizeText("Features", "Message")
-                    .Append(_mlContext.Transforms.NormalizeLpNorm("Features", "Features"))
-                    .AppendCacheCheckpoint(_mlContext);
-
-            var transformerChain = dataProcessPipeline.Fit(data);
-            var trainData = transformerChain.Transform(data);
+            var dataProcessPipeline = _mlContext.Transforms.Text.FeaturizeText("Features", "Message")
+                .Append(_mlContext.Transforms.NormalizeLpNorm("Features", "Features"))
+                .AppendCacheCheckpoint(_mlContext);
 
             var experiment = _mlContext
                 .Auto()
-                .CreateBinaryClassificationExperiment(20)
-                .Execute(trainData);
+                .CreateMulticlassClassificationExperiment(new MulticlassExperimentSettings() {
+                    OptimizingMetric = MulticlassClassificationMetric.MicroAccuracy, 
+                    MaxExperimentTimeInSeconds = 120,
+                    Trainers = {
+                        MulticlassClassificationTrainer.AveragedPerceptronOva
+                    }
+                })
+                .Execute(data, "IsSpam", preFeaturizer: dataProcessPipeline);
+
             var bestRunModel = experiment.BestRun.Model;
+            var predictions = bestRunModel.Transform(data);
+            var metrics = _mlContext.MulticlassClassification.Evaluate(predictions, "IsSpam");
 
-            var predictions = bestRunModel.Transform(trainData);
-            var metrics = _mlContext.BinaryClassification.EvaluateNonCalibrated(predictions);
-
-            await _dbModelManager.Save(bestRunModel, _mlContext, trainData.Schema, metrics);
+            await _dbModelManager.Save(bestRunModel, _mlContext, data.Schema, metrics);
         }
     }
 }

@@ -1,12 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.ML;
 using Microsoft.ML.Data;
 using MLNET.RealWorld.Db;
+using MLNET.RealWorld.Models;
 
 namespace MLNET.RealWorld.Services
 {
@@ -22,7 +20,7 @@ namespace MLNET.RealWorld.Services
 
         public async Task<IDataView> Load() {
             await Task.CompletedTask;
-            var databaseLoader = _mlContext.Data.CreateDatabaseLoader<SpamRecord>();
+            var databaseLoader = _mlContext.Data.CreateDatabaseLoader<SpamInput>();
             var dataView = databaseLoader.Load(
                 new DatabaseSource(SqlClientFactory.Instance,
                 _dbContext.Database.GetDbConnection().ConnectionString,

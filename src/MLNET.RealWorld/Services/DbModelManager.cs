@@ -15,11 +15,11 @@ namespace MLNET.RealWorld.Services {
             _context = context;
         }
 
-        public async Task Save(ITransformer bestRunModel, MLContext mlContext, DataViewSchema schema, BinaryClassificationMetrics metrics) {
+        public async Task Save(ITransformer bestRunModel, MLContext mlContext, DataViewSchema schema, MulticlassClassificationMetrics metrics) {
             await using var ms = new MemoryStream();
             mlContext.Model.Save(bestRunModel, schema, ms);
 
-            var trainedModel = new TrainedModel() { ModelData = ms.ToArray(), Accuracy = metrics.Accuracy};
+            var trainedModel = new TrainedModel() { ModelData = ms.ToArray(), Accuracy = metrics.MicroAccuracy};
 
             _context.TrainedModels.Add(trainedModel);
             await _context.SaveChangesAsync();

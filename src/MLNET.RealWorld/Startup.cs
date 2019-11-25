@@ -1,3 +1,4 @@
+using System;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -5,7 +6,10 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.ML;
+using Microsoft.Extensions.ML;
+using MLNET.RealWorld.Controllers;
 using MLNET.RealWorld.Db;
+using MLNET.RealWorld.Models;
 using MLNET.RealWorld.Services;
 
 namespace MLNET.RealWorld
@@ -25,9 +29,14 @@ namespace MLNET.RealWorld
             services.AddTransient<MLContext>();
             services.AddTransient<DataLoader>();
             services.AddTransient<DbModelManager>();
+            services.AddTransient<SpamDetector>();
             services.AddTransient<SpamDetectorTrainer>();
-            services.AddTransient<IStartupFilter, MigrationFilter>();
+
             services.AddDbContext<SpamDetectorDbContext>(builder => builder.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+            Uri.TryCreate($"http://127.0.0.1:5000/{nameof(ClassifierController).Replace("Controller", string.Empty)}/{nameof(ClassifierController.GetClassifierAsZip)}", UriKind.Absolute, out var uri);
+            services.AddPredictionEnginePool<SpamInput, SpamPrediction>().FromUri("SpamDetector", uri, TimeSpan.FromMinutes(1));
+
+            services.AddTransient<IStartupFilter, MigrationFilter>();
             services.AddControllers();
             services.AddOpenApiDocument();
         }
@@ -41,11 +50,7 @@ namespace MLNET.RealWorld
             }
 
             app.UseStaticFiles();
-            app.UseHttpsRedirection();
-
             app.UseRouting();
-
-            app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {
