@@ -2,9 +2,9 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.ML;
-using MLNET.RealWorld.Services;
+using MLNET.SpamDetector.RealWorld.Services;
 
-namespace MLNET.RealWorld.Controllers
+namespace MLNET.SpamDetector.RealWorld.Controllers
 {
     [ApiController]
     [Route("[controller]")]

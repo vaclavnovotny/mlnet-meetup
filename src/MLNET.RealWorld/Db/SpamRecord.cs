@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace MLNET.RealWorld.Db {
+namespace MLNET.SpamDetector.RealWorld.Db {
     public class SpamRecord
     {
         [Key]

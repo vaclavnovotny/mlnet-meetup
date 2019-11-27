@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace MLNET.RealWorld.Db {
+namespace MLNET.SpamDetector.RealWorld.Db {
     public class TrainedModel
     {
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]

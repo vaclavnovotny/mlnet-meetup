@@ -3,9 +3,9 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using MLNET.RealWorld.Db;
+using MLNET.SpamDetector.RealWorld.Db;
 
-namespace MLNET.RealWorld {
+namespace MLNET.SpamDetector.RealWorld {
     public class MigrationFilter : IStartupFilter
     {
         private readonly IServiceScopeFactory _scopeFactory;

@@ -1,10 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using MLNET.RealWorld.Models;
-using MLNET.RealWorld.Services;
+using MLNET.SpamDetector.RealWorld.Models;
 
-namespace MLNET.RealWorld.Controllers
+namespace MLNET.SpamDetector.RealWorld.Controllers
 {
     [Route("[controller]")]
     [ApiController]
@@ -12,7 +11,7 @@ namespace MLNET.RealWorld.Controllers
     {
         [HttpGet, Route(nameof(IsSpam))]
         [ProducesResponseType(typeof(SpamPrediction), 200)]
-        public async Task<ActionResult<bool>> IsSpam([Required] string message, [FromServices] SpamDetector spamDetector) {
+        public async Task<ActionResult<bool>> IsSpam([Required] string message, [FromServices] Services.SpamDetector spamDetector) {
             await Task.CompletedTask;
             var spamPrediction = spamDetector.Predict(message);
             return Ok(spamPrediction);

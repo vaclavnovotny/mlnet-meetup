@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 
-namespace MLNET.RealWorld
+namespace MLNET.SpamDetector.RealWorld
 {
     public class Program
     {

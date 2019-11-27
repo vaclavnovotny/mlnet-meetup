@@ -2,7 +2,7 @@
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
 
-namespace MLNET.RealWorld.Db
+namespace MLNET.SpamDetector.RealWorld.Db
 {
     public class SpamDetectorDbContext : DbContext
     {

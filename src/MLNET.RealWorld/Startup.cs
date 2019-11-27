@@ -5,14 +5,14 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.ML;
 using Microsoft.Extensions.ML;
-using MLNET.RealWorld.Controllers;
-using MLNET.RealWorld.Db;
-using MLNET.RealWorld.Models;
-using MLNET.RealWorld.Services;
+using Microsoft.ML;
+using MLNET.SpamDetector.RealWorld.Controllers;
+using MLNET.SpamDetector.RealWorld.Db;
+using MLNET.SpamDetector.RealWorld.Models;
+using MLNET.SpamDetector.RealWorld.Services;
 
-namespace MLNET.RealWorld
+namespace MLNET.SpamDetector.RealWorld
 {
     public class Startup
     {
@@ -29,7 +29,7 @@ namespace MLNET.RealWorld
             services.AddTransient<MLContext>();
             services.AddTransient<DataLoader>();
             services.AddTransient<DbModelManager>();
-            services.AddTransient<SpamDetector>();
+            services.AddTransient<Services.SpamDetector>();
             services.AddTransient<SpamDetectorTrainer>();
 
             services.AddDbContext<SpamDetectorDbContext>(builder => builder.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));

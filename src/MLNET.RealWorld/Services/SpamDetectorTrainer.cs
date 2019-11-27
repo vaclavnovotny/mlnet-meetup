@@ -2,7 +2,7 @@
 using Microsoft.ML;
 using Microsoft.ML.AutoML;
 
-namespace MLNET.RealWorld.Services
+namespace MLNET.SpamDetector.RealWorld.Services
 {
     public class SpamDetectorTrainer
     {
@@ -27,10 +27,7 @@ namespace MLNET.RealWorld.Services
                 .Auto()
                 .CreateMulticlassClassificationExperiment(new MulticlassExperimentSettings() {
                     OptimizingMetric = MulticlassClassificationMetric.MicroAccuracy, 
-                    MaxExperimentTimeInSeconds = 120,
-                    Trainers = {
-                        MulticlassClassificationTrainer.AveragedPerceptronOva
-                    }
+                    MaxExperimentTimeInSeconds = 120
                 })
                 .Execute(data, "IsSpam", preFeaturizer: dataProcessPipeline);
 

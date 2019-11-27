@@ -21,7 +21,7 @@ namespace MLNET.Core
         public static void OutputBinaryClassMetrics(ITransformer model, IDataView data, MLContext mlContext)
         {
             var dataView = model.Transform(data);
-            var metrics = mlContext.BinaryClassification.EvaluateNonCalibrated(dataView, "BoolLabel");
+            var metrics = mlContext.BinaryClassification.EvaluateNonCalibrated(dataView);
             var confusionTable = metrics.ConfusionMatrix.GetFormattedConfusionTable();
             Console.WriteLine($"\nAccuracy: {metrics.Accuracy}");
             Console.Write(confusionTable);

@@ -3,10 +3,10 @@ using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.ML;
 using Microsoft.ML.Data;
-using MLNET.RealWorld.Db;
-using MLNET.RealWorld.Models;
+using MLNET.SpamDetector.RealWorld.Db;
+using MLNET.SpamDetector.RealWorld.Models;
 
-namespace MLNET.RealWorld.Services
+namespace MLNET.SpamDetector.RealWorld.Services
 {
     public class DataLoader
     {

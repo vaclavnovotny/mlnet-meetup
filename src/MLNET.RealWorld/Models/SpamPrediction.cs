@@ -1,6 +1,6 @@
 ﻿using Microsoft.ML.Data;
 
-namespace MLNET.RealWorld.Models {
+namespace MLNET.SpamDetector.RealWorld.Models {
     public class SpamPrediction
     {
         [ColumnName("PredictedLabel")]

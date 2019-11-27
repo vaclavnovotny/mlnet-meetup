@@ -1,8 +1,9 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace MLNET.RealWorld.Migrations
+namespace MLNET.SpamDetector.RealWorld.Migrations
 {
-    public partial class InitialCreate : Migration
+    public partial class Init : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -18,6 +19,21 @@ namespace MLNET.RealWorld.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_SpamRecords", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "TrainedModels",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    ModelData = table.Column<byte[]>(nullable: true),
+                    Accuracy = table.Column<double>(nullable: false),
+                    TrainedAt = table.Column<DateTime>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TrainedModels", x => x.Id);
                 });
 
             migrationBuilder.InsertData(
@@ -5655,6 +5671,9 @@ namespace MLNET.RealWorld.Migrations
         {
             migrationBuilder.DropTable(
                 name: "SpamRecords");
+
+            migrationBuilder.DropTable(
+                name: "TrainedModels");
         }
     }
 }

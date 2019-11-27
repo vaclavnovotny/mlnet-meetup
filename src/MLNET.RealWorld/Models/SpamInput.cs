@@ -1,4 +1,4 @@
-﻿namespace MLNET.RealWorld.Models
+﻿namespace MLNET.SpamDetector.RealWorld.Models
 {
     public class SpamInput
     {

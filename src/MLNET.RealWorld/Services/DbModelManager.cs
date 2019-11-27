@@ -4,9 +4,9 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.ML;
 using Microsoft.ML.Data;
-using MLNET.RealWorld.Db;
+using MLNET.SpamDetector.RealWorld.Db;
 
-namespace MLNET.RealWorld.Services {
+namespace MLNET.SpamDetector.RealWorld.Services {
     public class DbModelManager
     {
         private readonly SpamDetectorDbContext _context;

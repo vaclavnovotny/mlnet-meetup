@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.ML;
-using MLNET.RealWorld.Models;
+using MLNET.SpamDetector.RealWorld.Models;
 
-namespace MLNET.RealWorld.Services
+namespace MLNET.SpamDetector.RealWorld.Services
 {
     public class SpamDetector
     {
