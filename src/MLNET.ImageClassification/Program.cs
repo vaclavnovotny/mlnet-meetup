@@ -31,7 +31,7 @@ namespace MLNET.ImageClassification
         }
 
         private static ITransformer LoadModel(string path, MLContext mlContext) {
-            return mlContext.Model.Load(path, out var schema);
+            return mlContext.Model.Load(path, out _);
         }
 
         private static ITransformer TrainModel(IDataView trainSet, IDataView validationSet, string workspaceRelativePath, MLContext mlContext) {
@@ -54,6 +54,7 @@ namespace MLNET.ImageClassification
             ITransformer trainedModel;
             using (new PerformanceTimer("DNN Image classifier training"))
                 trainedModel = trainingPipeline.Fit(trainSet);
+
             return trainedModel;
         }
 
