@@ -1,7 +1,6 @@
 ﻿using System.IO;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.ML;
 using MLNET.SpamDetector.RealWorld.Services;
 
 namespace MLNET.SpamDetector.RealWorld.Controllers
@@ -17,10 +16,9 @@ namespace MLNET.SpamDetector.RealWorld.Controllers
         }
 
         [HttpGet, Route(nameof(GetClassifierAsZip))]
-        public async Task<IActionResult> GetClassifierAsZip([FromServices] DbModelManager dbModelManager, [FromServices] MLContext mlContext) {
+        public async Task<IActionResult> GetClassifierAsZip([FromServices] DbModelManager dbModelManager) {
             var trainedModel = await dbModelManager.LoadLast();
-            var ms = new MemoryStream(trainedModel.ModelData);
-            return File(ms, "application/zip");
+            return File(trainedModel.ModelData, "application/zip");
         }
     }
 }

@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using Microsoft.ML;
 using Microsoft.ML.Vision;
+using MLNET.Core;
 
 namespace MLNET.ImageClassification
 {
@@ -12,32 +13,34 @@ namespace MLNET.ImageClassification
         static void Main(string[] args)
         {
             var projectDirectory = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../"));
-            var workspaceRelativePath = Path.Combine(projectDirectory, "workspace");
+            var workspaceRelativePath = Path.Combine(projectDirectory, "workspaceHuge");
             var assetsRelativePath = Path.Combine(projectDirectory, "Data");
-            IEnumerable<ImageData> images = LoadImagesFromDirectory(assetsRelativePath);
+            var modelDestinationPath = Path.Combine(projectDirectory, "Model", "modelHuge.zip");
 
             var mlContext = new MLContext();
-            var imageData = mlContext.Data.LoadFromEnumerable(images);
-            var shuffledData = mlContext.Data.ShuffleRows(imageData);
-            var preprocessingPipeline = mlContext.Transforms.Conversion.MapValueToKey(inputColumnName: "Label", outputColumnName: "LabelAsKey")
-                .Append(mlContext.Transforms.LoadRawImageBytes(inputColumnName: "ImagePath", outputColumnName: "Image", imageFolder:assetsRelativePath));
+            LoadData(assetsRelativePath, mlContext, out var trainSet, out var validationSet, out var testSet);
 
-            var preprocessedData = preprocessingPipeline.Fit(shuffledData).Transform(shuffledData);
-            DataOperationsCatalog.TrainTestData trainSplit = mlContext.Data.TrainTestSplit(data: preprocessedData, testFraction: 0.15);
-            DataOperationsCatalog.TrainTestData validationTestSplit = mlContext.Data.TrainTestSplit(trainSplit.TestSet);
+            var trainedModel = File.Exists(modelDestinationPath)
+                                   ? LoadModel(modelDestinationPath, mlContext)
+                                   : TrainModel(trainSet, validationSet, workspaceRelativePath, mlContext);
 
-            IDataView trainSet = trainSplit.TrainSet;
-            IDataView validationSet = validationTestSplit.TrainSet;
-            IDataView testSet = validationTestSplit.TestSet;
+            //ClassifyImages(mlContext, testSet, trainedModel);
+            ClassifyImagesWithEngine(mlContext, testSet, trainedModel);
 
-            var classifierOptions = new ImageClassificationTrainer.Options()
-            {
+            mlContext.Model.Save(trainedModel, trainSet.Schema, modelDestinationPath);
+        }
+
+        private static ITransformer LoadModel(string path, MLContext mlContext) {
+            return mlContext.Model.Load(path, out var schema);
+        }
+
+        private static ITransformer TrainModel(IDataView trainSet, IDataView validationSet, string workspaceRelativePath, MLContext mlContext) {
+            var classifierOptions = new ImageClassificationTrainer.Options() {
                 FeatureColumnName = "Image",
                 LabelColumnName = "LabelAsKey",
                 ValidationSet = validationSet,
                 Arch = ImageClassificationTrainer.Architecture.ResnetV2101,
                 MetricsCallback = Console.WriteLine,
-                //BatchSize = 100,
                 TestOnTrainSet = false,
                 ReuseTrainSetBottleneckCachedValues = true,
                 ReuseValidationSetBottleneckCachedValues = true,
@@ -47,17 +50,33 @@ namespace MLNET.ImageClassification
             var trainingPipeline = mlContext.MulticlassClassification.Trainers.ImageClassification(classifierOptions)
                 .Append(mlContext.Transforms.Conversion.MapKeyToValue("PredictedLabel"));
 
-            ITransformer trainedModel = trainingPipeline.Fit(trainSet);
+            // takes approx. ~ 31min for 10 classes, 18300 images
+            ITransformer trainedModel;
+            using (new PerformanceTimer("DNN Image classifier training"))
+                trainedModel = trainingPipeline.Fit(trainSet);
+            return trainedModel;
+        }
 
-            ClassifyImages(mlContext, testSet, trainedModel);
+        private static void LoadData(string assetsRelativePath, MLContext mlContext, out IDataView trainSet, out IDataView validationSet, out IDataView testSet) {
+            var images = LoadImagesFromDirectory(assetsRelativePath);
+            var imageData = mlContext.Data.LoadFromEnumerable(images);
+            var shuffledData = mlContext.Data.ShuffleRows(imageData);
+            var preprocessingPipeline = mlContext.Transforms.Conversion.MapValueToKey(inputColumnName: "Label", outputColumnName: "LabelAsKey")
+                .Append(mlContext.Transforms.LoadRawImageBytes(inputColumnName: "ImagePath", outputColumnName: "Image", imageFolder: assetsRelativePath));
 
-            mlContext.Model.Save(trainedModel, trainSet.Schema, @"C:\Users\novotnyv\Documents\YSoft\mlnet-meetup\src\MLNET.ImageClassification\Model\model.zip");
+            var preprocessedData = preprocessingPipeline.Fit(shuffledData).Transform(shuffledData);
+            var trainSplit = mlContext.Data.TrainTestSplit(data: preprocessedData, testFraction: 0.2);
+            var validationTestSplit = mlContext.Data.TrainTestSplit(trainSplit.TestSet);
+
+            trainSet = trainSplit.TrainSet;
+            validationSet = validationTestSplit.TrainSet;
+            testSet = validationTestSplit.TestSet;
         }
 
         public static void ClassifyImages(MLContext mlContext, IDataView data, ITransformer trainedModel)
         {
-            IDataView predictionData = trainedModel.Transform(data);
-            IEnumerable<ModelOutput> predictions = mlContext.Data.CreateEnumerable<ModelOutput>(predictionData, reuseRowObject: true);
+            var predictionData = trainedModel.Transform(data);
+            var predictions = mlContext.Data.CreateEnumerable<ModelOutput>(predictionData, reuseRowObject: true);
             Console.WriteLine("Classifying multiple images");
             foreach (var prediction in predictions)
             {
@@ -65,10 +84,24 @@ namespace MLNET.ImageClassification
             }
         }
 
+        public static void ClassifyImagesWithEngine(MLContext mlContext, IDataView data, ITransformer trainedModel)
+        {
+            var predictionEngine = mlContext.Model.CreatePredictionEngine<ModelInput, ModelOutput>(trainedModel);
+            var inputs = mlContext.Data.CreateEnumerable<ModelInput>(data, reuseRowObject: true);
+            Console.WriteLine("Classifying multiple images using prediction engine.");
+            foreach (var input in inputs) {
+                // Single prediction takes approx. ~ 90ms
+                ModelOutput prediction;
+                using (new PerformanceTimer("Single prediction"))
+                    prediction = predictionEngine.Predict(input);
+                OutputPrediction(prediction);
+            }
+        }
+
         private static void OutputPrediction(ModelOutput prediction)
         {
-            string imageName = Path.GetFileName(prediction.ImagePath);
-            Console.WriteLine($"Image: {imageName} | Actual Value: {prediction.Label} | Predicted Value: {prediction.PredictedLabel}");
+            var imageName = Path.GetFileName(prediction.ImagePath);
+            Console.WriteLine($"Image: {imageName} | Actual Value: {prediction.Label} | Predicted Value: {prediction.PredictedLabel}{(prediction.Label != prediction.PredictedLabel ? " WRONG" : string.Empty)}");
         }
 
         private static IEnumerable<ImageData> LoadImagesFromDirectory(string folder) {
@@ -77,32 +110,5 @@ namespace MLNET.ImageClassification
                 Label = x.Directory.Name
             });
         }
-    }
-
-    internal class ModelInput
-    {
-        public byte[] Image { get; set; }
-
-        public UInt32 LabelAsKey { get; set; }
-
-        public string ImagePath { get; set; }
-
-        public string Label { get; set; }
-    }
-
-    internal class ModelOutput
-    {
-        public string ImagePath { get; set; }
-
-        public string Label { get; set; }
-
-        public string PredictedLabel { get; set; }
-    }
-
-    internal class ImageData
-    {
-        public string ImagePath { get; set; }
-        public string Label { get; set; }
-
     }
 }
