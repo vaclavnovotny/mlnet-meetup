@@ -12,8 +12,8 @@ namespace MLNET.AutoML
         static void Main(string[] args)
         {
             var mlContext = new MLContext();
-
             var trainDataPath = Path.Combine(Environment.CurrentDirectory, "..", "..", "..", "RawData", "SMSSpamCollection");
+
             var data = mlContext.Data.LoadFromTextFile<SpamInput>(path: trainDataPath);
 
             var experiment = mlContext

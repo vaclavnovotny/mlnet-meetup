@@ -29,7 +29,7 @@ namespace MLNET.SpamDetection
 
             // Set the training algorithm 
             var trainer = mlContext.MulticlassClassification.Trainers.PairwiseCoupling(
-                    mlContext.BinaryClassification.Trainers.AveragedPerceptron("Label", numberOfIterations: 20, featureColumnName: "FeaturesText"))
+                    mlContext.BinaryClassification.Trainers.AveragedPerceptron("Label", numberOfIterations: 20, featureColumnName: "Features"))
                 .Append(mlContext.Transforms.Conversion.MapKeyToValue("PredictedLabel", "PredictedLabel"));
             var trainingPipeLine = dataProcessPipeline.Append(trainer);
             
