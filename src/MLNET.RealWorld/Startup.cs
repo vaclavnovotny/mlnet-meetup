@@ -33,12 +33,15 @@ namespace MLNET.SpamDetector.RealWorld
             services.AddTransient<SpamDetectorTrainer>();
 
             services.AddDbContext<SpamDetectorDbContext>(builder => builder.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+
             Uri.TryCreate($"http://127.0.0.1:5000/{nameof(ClassifierController).Replace("Controller", string.Empty)}/{nameof(ClassifierController.GetClassifierAsZip)}", UriKind.Absolute, out var uri);
             services.AddPredictionEnginePool<SpamInput, SpamPrediction>().FromUri("SpamDetector", uri, TimeSpan.FromMinutes(1));
 
             services.AddTransient<IStartupFilter, MigrationFilter>();
             services.AddControllers();
-            services.AddOpenApiDocument();
+            services.AddOpenApiDocument(settings => {
+                settings.Title = "Spam Detector";
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

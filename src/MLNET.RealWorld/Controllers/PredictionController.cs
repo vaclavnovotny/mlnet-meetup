@@ -9,6 +9,12 @@ namespace MLNET.SpamDetector.RealWorld.Controllers
     [ApiController]
     public class PredictionController : ControllerBase
     {
+        /// <summary>
+        /// Predicts if <paramref name="message"/> is spam or not using latest trained spam detector classifier.
+        /// </summary>
+        /// <param name="message">Message to predict</param>
+        /// <param name="spamDetector"></param>
+        /// <returns>Whether is spam or not</returns>
         [HttpGet, Route(nameof(IsSpam))]
         [ProducesResponseType(typeof(SpamPrediction), 200)]
         public async Task<ActionResult<bool>> IsSpam([Required] string message, [FromServices] Services.SpamDetector spamDetector) {
