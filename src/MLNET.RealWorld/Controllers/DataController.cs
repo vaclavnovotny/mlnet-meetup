@@ -11,7 +11,9 @@ namespace MLNET.SpamDetector.RealWorld.Controllers
     public class DataController : ControllerBase
     {
         [HttpGet, Route(nameof(GetAllRecords)), ProducesResponseType(typeof(List<SpamRecord>), 200)]
-        public async Task<ActionResult<List<SpamRecord>>> GetAllRecords([FromServices] SpamDetectorDbContext context) => Ok(await context.SpamRecords.ToListAsync());
+        public async Task<ActionResult<List<SpamRecord>>> GetAllRecords([FromServices] SpamDetectorDbContext context) {
+            return Ok(await context.SpamRecords.ToListAsync());
+        }
 
         [HttpPost, Route(nameof(AddSample)), ProducesResponseType(200)]
         public async Task<IActionResult> AddSample([FromServices] SpamDetectorDbContext context, string message, bool isSpam) {

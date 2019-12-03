@@ -15,37 +15,57 @@ namespace MLNET.SpamDetection
             // Set up the MLContext, which is a catalog of components in ML.NET.
             var mlContext = new MLContext();
 
+            #region LoadData
+
             var trainDataPath = Path.Combine(Environment.CurrentDirectory, "..", "..", "..", "RawData", "SMSSpamCollection");
             // Specify the schema for spam data and read it into DataView.
             var data = mlContext.Data.LoadFromTextFile<SpamInput>(path: trainDataPath);
 
+            #endregion
+
+            #region PreprocessData
+
             // Create the estimator which converts the text label to boolean, featurizes the text, and adds a linear trainer.
-            // Data process configuration with pipeline data transformations 
+            // Data process configuration with pipeline data transformations
             var dataProcessPipeline = mlContext.Transforms.Conversion.MapValueToKey("Label", "Label")
                 .Append(mlContext.Transforms.Text.FeaturizeText("FeaturesText", "Message"))
                 .Append(mlContext.Transforms.CopyColumns("Features", "FeaturesText"))
                 .Append(mlContext.Transforms.NormalizeLpNorm("Features", "Features"))
                 .AppendCacheCheckpoint(mlContext);
 
+            #endregion
+
+            #region SelectModel
+
             // Set the training algorithm 
             var trainer = mlContext.MulticlassClassification.Trainers.PairwiseCoupling(
                     mlContext.BinaryClassification.Trainers.AveragedPerceptron("Label", numberOfIterations: 20, featureColumnName: "Features"))
                 .Append(mlContext.Transforms.Conversion.MapKeyToValue("PredictedLabel", "PredictedLabel"));
             var trainingPipeLine = dataProcessPipeline.Append(trainer);
-            
-            Console.WriteLine("Training model...");
 
+            #endregion
+
+            #region StartTraining
+
+            Console.WriteLine("Training model...");
             // Now let's train a model on the full data set!
             TransformerChain<TransformerChain<KeyToValueMappingTransformer>> model;
             using (new PerformanceTimer("Training of model")) {
                 model = trainingPipeLine.Fit(data);
             }
 
+            #endregion
+
+            #region SaveTrainedModel
+
             mlContext.Model.Save(model, data.Schema, Path.Combine($"{Environment.CurrentDirectory}", "SpamDetectorModel.zip"));
+
+            #endregion
 
             // Calculate some metrics
             Helpers.OutputMultiClassMetrics(model, data, mlContext);
             
+            // Lets test some of our own messages!
             TestMessages(mlContext, model);
         }
 

@@ -10,6 +10,8 @@ namespace MLNET.SpamDetector.RealWorld.Services
             _predictionEnginePool = predictionEnginePool;
         }
 
-        public SpamPrediction Predict(string message) => _predictionEnginePool.Predict(ModelsCatalog.SpamDetector, new SpamInput() {Message = message});
+        public SpamPrediction Predict(string message) {
+            return _predictionEnginePool.Predict(ModelsCatalog.SpamDetector, new SpamInput() {Message = message});
+        }
     }
 }

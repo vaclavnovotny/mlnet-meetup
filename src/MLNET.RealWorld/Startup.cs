@@ -26,22 +26,32 @@ namespace MLNET.SpamDetector.RealWorld
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            #region ServicesRegistration
+
             services.AddTransient<MLContext>();
             services.AddTransient<DataLoader>();
             services.AddTransient<DbModelManager>();
             services.AddTransient<Services.SpamDetector>();
-            services.AddTransient<SpamDetectorTrainer>();
-
+            services.AddTransient<SpamDetectorTrainer>(); 
             services.AddDbContext<SpamDetectorDbContext>(builder => builder.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+            
+            #endregion
 
-            Uri.TryCreate($"http://127.0.0.1:5000/{nameof(ClassifierController).Replace("Controller", string.Empty)}/{nameof(ClassifierController.GetClassifierAsZip)}", UriKind.Absolute, out var uri);
+            Uri.TryCreate(
+                "http://127.0.0.1:5000/Classifier/GetClassifierAsZip",
+                UriKind.Absolute,
+                out var uri);
             services.AddPredictionEnginePool<SpamInput, SpamPrediction>().FromUri(ModelsCatalog.SpamDetector, uri, TimeSpan.FromMinutes(5));
+
+            #region OtherServices
 
             services.AddTransient<IStartupFilter, MigrationFilter>();
             services.AddControllers();
             services.AddOpenApiDocument(settings => {
                 settings.Title = "Spam Detector";
             });
+
+            #endregion
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -3,7 +3,7 @@
 namespace MLNET.Core {
     public class SpamInput
     {
-        [LoadColumn(0), ColumnName("Label")]
+        [LoadColumn(0)]
         public string Label { get; set; }
 
         [LoadColumn(1)]

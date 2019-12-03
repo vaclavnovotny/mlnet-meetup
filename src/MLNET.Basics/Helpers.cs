@@ -37,7 +37,7 @@ namespace MLNET.Core
                 prediction = predictor.Predict(input);
             }
             Console.BackgroundColor = prediction.IsSpam ? ConsoleColor.DarkRed : ConsoleColor.Black;
-            Console.WriteLine($"The message '{input.Message}' is {(prediction.IsSpam ? "spam" : "not spam")}. {prediction.Scores[0]:0.000}, {prediction.Scores[1]:0.000}\n");
+            Console.WriteLine($"The message '{input.Message}' is {(prediction.IsSpam ? "spam" : "not spam")}. NotSpam:{prediction.Scores[0]:0.000}, IsSpam:{prediction.Scores[1]:0.000}\n");
             Console.BackgroundColor = ConsoleColor.Black;
         }
     }

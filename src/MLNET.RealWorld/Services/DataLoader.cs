@@ -21,6 +21,7 @@ namespace MLNET.SpamDetector.RealWorld.Services
         public async Task<IDataView> Load() {
             await Task.CompletedTask;
             var databaseLoader = _mlContext.Data.CreateDatabaseLoader<SpamInput>();
+
             var dataView = databaseLoader.Load(
                 new DatabaseSource(SqlClientFactory.Instance,
                 _dbContext.Database.GetDbConnection().ConnectionString,

@@ -19,7 +19,10 @@ namespace MLNET.SpamDetector.RealWorld.Services {
             await using var ms = new MemoryStream();
             mlContext.Model.Save(bestRunModel, schema, ms);
 
-            var trainedModel = new TrainedModel() { ModelData = ms.ToArray(), Accuracy = metrics.MicroAccuracy};
+            var trainedModel = new TrainedModel() {
+                ModelData = ms.ToArray(), 
+                Accuracy = metrics.MicroAccuracy
+            };
 
             _context.TrainedModels.Add(trainedModel);
             await _context.SaveChangesAsync();
