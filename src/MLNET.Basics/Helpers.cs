@@ -7,7 +7,6 @@ namespace MLNET.Core
     {
         public static void OutputMultiClassMetrics(ITransformer model, IDataView data, MLContext mlContext)
         {
-
             var dataView = model.Transform(data);
             var metrics = mlContext.MulticlassClassification.Evaluate(dataView);
             var confusionTable = metrics.ConfusionMatrix.GetFormattedConfusionTable();

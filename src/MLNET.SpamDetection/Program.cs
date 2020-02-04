@@ -1,8 +1,6 @@
 ﻿using System;
 using System.IO;
 using Microsoft.ML;
-using Microsoft.ML.Data;
-using Microsoft.ML.Transforms;
 using MLNET.Core;
 
 namespace MLNET.SpamDetection
@@ -19,7 +17,7 @@ namespace MLNET.SpamDetection
 
             var trainDataPath = Path.Combine(Environment.CurrentDirectory, "..", "..", "..", "RawData", "SMSSpamCollection");
             // Specify the schema for spam data and read it into DataView.
-            var data = mlContext.Data.LoadFromTextFile<SpamInput>(path: trainDataPath);
+            IDataView data = mlContext.Data.LoadFromTextFile<SpamInput>(path: trainDataPath);
 
             #endregion
 
@@ -27,11 +25,11 @@ namespace MLNET.SpamDetection
 
             // Create the estimator which converts the text label to boolean, featurizes the text, and adds a linear trainer.
             // Data process configuration with pipeline data transformations
-            var dataProcessPipeline = mlContext.Transforms.Conversion.MapValueToKey("Label", "Label")
+            var dataProcessPipeline = 
+                mlContext.Transforms.Conversion.MapValueToKey("Label", "Label")
                 .Append(mlContext.Transforms.Text.FeaturizeText("FeaturesText", "Message"))
                 .Append(mlContext.Transforms.CopyColumns("Features", "FeaturesText"))
-                .Append(mlContext.Transforms.NormalizeLpNorm("Features", "Features"))
-                .AppendCacheCheckpoint(mlContext);
+                .Append(mlContext.Transforms.NormalizeLpNorm("Features", "Features"));
 
             #endregion
 
@@ -39,7 +37,7 @@ namespace MLNET.SpamDetection
 
             // Set the training algorithm 
             var trainer = mlContext.MulticlassClassification.Trainers.PairwiseCoupling(
-                    mlContext.BinaryClassification.Trainers.AveragedPerceptron("Label", numberOfIterations: 20, featureColumnName: "Features"))
+                    mlContext.BinaryClassification.Trainers.AveragedPerceptron(numberOfIterations: 20))
                 .Append(mlContext.Transforms.Conversion.MapKeyToValue("PredictedLabel", "PredictedLabel"));
             var trainingPipeLine = dataProcessPipeline.Append(trainer);
 
@@ -49,7 +47,7 @@ namespace MLNET.SpamDetection
 
             Console.WriteLine("Training model...");
             // Now let's train a model on the full data set!
-            TransformerChain<TransformerChain<KeyToValueMappingTransformer>> model;
+            ITransformer model;
             using (new PerformanceTimer("Training of model")) {
                 model = trainingPipeLine.Fit(data);
             }
@@ -62,14 +60,22 @@ namespace MLNET.SpamDetection
 
             #endregion
 
+            #region OutputMetrics
+
             // Calculate some metrics
             Helpers.OutputMultiClassMetrics(model, data, mlContext);
-            
+
+            #endregion
+
+            #region TestOnCustomData
+
             // Lets test some of our own messages!
             TestMessages(mlContext, model);
+
+            #endregion
         }
 
-        private static void TestMessages(MLContext mlContext, TransformerChain<TransformerChain<KeyToValueMappingTransformer>> model) {
+        private static void TestMessages(MLContext mlContext, ITransformer model) {
             // Create a PredictionFunction from our model 
             var predictor = mlContext.Model.CreatePredictionEngine<SpamInput, SpamPrediction>(model);
 

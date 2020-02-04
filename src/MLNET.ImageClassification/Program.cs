@@ -12,7 +12,8 @@ namespace MLNET.ImageClassification
     {
         static void Main(string[] args)
         {
-            var projectDirectory = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../"));
+
+            var projectDirectory = args.Length == 1 ? args[0] : Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../"));
             var workspaceRelativePath = Path.Combine(projectDirectory, "workspaceHuge");
             var assetsRelativePath = Path.Combine(projectDirectory, "Data");
             var modelDestinationPath = Path.Combine(projectDirectory, "Model", "modelHuge.zip");
@@ -28,6 +29,29 @@ namespace MLNET.ImageClassification
             ClassifyImagesWithEngine(mlContext, testSet, trainedModel);
 
             mlContext.Model.Save(trainedModel, trainSet.Schema, modelDestinationPath);
+        }
+
+        private static void LoadData(string assetsRelativePath, MLContext mlContext, out IDataView trainSet, out IDataView validationSet, out IDataView testSet) {
+            var images = LoadImagesFromDirectory(assetsRelativePath);
+            var imageData = mlContext.Data.LoadFromEnumerable(images);
+            var shuffledData = mlContext.Data.ShuffleRows(imageData);
+            var preprocessingPipeline = mlContext.Transforms.Conversion.MapValueToKey(inputColumnName: "Label", outputColumnName: "LabelAsKey")
+                .Append(mlContext.Transforms.LoadRawImageBytes(inputColumnName: "ImagePath", outputColumnName: "Image", imageFolder: assetsRelativePath));
+
+            var preprocessedData = preprocessingPipeline.Fit(shuffledData).Transform(shuffledData);
+            var trainSplit = mlContext.Data.TrainTestSplit(data: preprocessedData, testFraction: 0.2);
+            var validationTestSplit = mlContext.Data.TrainTestSplit(trainSplit.TestSet);
+
+            trainSet = trainSplit.TrainSet;
+            validationSet = validationTestSplit.TrainSet;
+            testSet = validationTestSplit.TestSet;
+        }
+
+        private static IEnumerable<ImageData> LoadImagesFromDirectory(string folder) {
+            return new DirectoryInfo(folder).EnumerateFiles("*.jpeg", SearchOption.AllDirectories).Select(x => new ImageData() {
+                ImagePath = x.FullName,
+                Label = x.Directory.Name
+            });
         }
 
         private static ITransformer LoadModel(string path, MLContext mlContext) {
@@ -56,22 +80,6 @@ namespace MLNET.ImageClassification
                 trainedModel = trainingPipeline.Fit(trainSet);
 
             return trainedModel;
-        }
-
-        private static void LoadData(string assetsRelativePath, MLContext mlContext, out IDataView trainSet, out IDataView validationSet, out IDataView testSet) {
-            var images = LoadImagesFromDirectory(assetsRelativePath);
-            var imageData = mlContext.Data.LoadFromEnumerable(images);
-            var shuffledData = mlContext.Data.ShuffleRows(imageData);
-            var preprocessingPipeline = mlContext.Transforms.Conversion.MapValueToKey(inputColumnName: "Label", outputColumnName: "LabelAsKey")
-                .Append(mlContext.Transforms.LoadRawImageBytes(inputColumnName: "ImagePath", outputColumnName: "Image", imageFolder: assetsRelativePath));
-
-            var preprocessedData = preprocessingPipeline.Fit(shuffledData).Transform(shuffledData);
-            var trainSplit = mlContext.Data.TrainTestSplit(data: preprocessedData, testFraction: 0.2);
-            var validationTestSplit = mlContext.Data.TrainTestSplit(trainSplit.TestSet);
-
-            trainSet = trainSplit.TrainSet;
-            validationSet = validationTestSplit.TrainSet;
-            testSet = validationTestSplit.TestSet;
         }
 
         public static void ClassifyImages(MLContext mlContext, IDataView data, ITransformer trainedModel)
@@ -103,13 +111,6 @@ namespace MLNET.ImageClassification
         {
             var imageName = Path.GetFileName(prediction.ImagePath);
             Console.WriteLine($"Image: {imageName} | Actual Value: {prediction.Label} | Predicted Value: {prediction.PredictedLabel}{(prediction.Label != prediction.PredictedLabel ? " WRONG" : string.Empty)}");
-        }
-
-        private static IEnumerable<ImageData> LoadImagesFromDirectory(string folder) {
-            return new DirectoryInfo(folder).EnumerateFiles("*.jpeg", SearchOption.AllDirectories).Select(x => new ImageData() {
-                ImagePath = x.FullName,
-                Label = x.Directory.Name
-            });
         }
     }
 }
