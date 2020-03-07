@@ -5,3 +5,4 @@ src/MLNET.ImageClassification/Data/
 src/MLNET.ImageClassification/workspace/
 src/MLNET.ImageClassification/workspaceHuge/
 src/MLNET.ImageClassification/Model/
+src/MLNET.Benchmark/BenchmarkDotNet.Artifacts/

@@ -56,7 +56,7 @@ namespace MLNET.SpamDetection
 
             #region SaveTrainedModel
 
-            mlContext.Model.Save(model, data.Schema, Path.Combine($"{Environment.CurrentDirectory}", "SpamDetectorModel.zip"));
+            mlContext.Model.Save(model, data.Schema, Path.Combine($"{Environment.CurrentDirectory}", "..", "..", "..", "SpamDetectorModel.zip"));
 
             #endregion
 

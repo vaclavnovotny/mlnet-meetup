@@ -11,7 +11,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MLNET.AutoML", "MLNET.AutoM
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MLNET.SpamDetector.RealWorld", "MLNET.RealWorld\MLNET.SpamDetector.RealWorld.csproj", "{31B7F151-DB63-4CAA-A60F-E7365200CD18}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MLNET.ImageClassification", "MLNET.ImageClassification\MLNET.ImageClassification.csproj", "{C05AD6B8-B6CB-4211-9FFB-704425C59534}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MLNET.ImageClassification", "MLNET.ImageClassification\MLNET.ImageClassification.csproj", "{C05AD6B8-B6CB-4211-9FFB-704425C59534}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MLNET.Benchmark", "MLNET.Benchmark\MLNET.Benchmark.csproj", "{6295F5C3-E29C-497E-A066-7ABE525E7A7F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,6 +41,10 @@ Global
 		{C05AD6B8-B6CB-4211-9FFB-704425C59534}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C05AD6B8-B6CB-4211-9FFB-704425C59534}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C05AD6B8-B6CB-4211-9FFB-704425C59534}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6295F5C3-E29C-497E-A066-7ABE525E7A7F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6295F5C3-E29C-497E-A066-7ABE525E7A7F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6295F5C3-E29C-497E-A066-7ABE525E7A7F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6295F5C3-E29C-497E-A066-7ABE525E7A7F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
